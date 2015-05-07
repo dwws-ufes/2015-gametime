@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/resources/decorator.xhtml">
+
+	<!--     DEFINNIÇÃO DO TITULO   -->
+    <ui:define name="title"><h:outputText value="#{msgsGametime['manageGroupGame.title']}" /></ui:define>
+
+
+	<!--  DEFINICAO DO CONTEUDO PPRINCIPAL -->
+    <ui:define name="contents">
+       
+       
+       	<!--   TITULO DO CONTEUDO PRINCIPAL   -->
+        <h1><h:outputText value="#{msgsGametime['manageGroupGame.title']}" /></h1>
+
+
+		<!--  FORMULARIO DA LISTA DE GRUPO  -->
+		<div class="crud">
+			<h:form id="listingForm">
+                
+				<h:panelGroup id="listing" styleClass="listing">
+                    <p:dataTable
+                        widgetVar="listingTable"
+                        value="#{manageGroupGameController.lazyEntities}" 
+                        var="entity"
+                        rows="#{manageGroupGameController.entities.size()}"      		
+                		lazy="true"
+                        selection="#{manageGroupGameController.selectedEntity}" 
+                        selectionMode="single" 
+                        loadingMessage="#{msgsGametime['text.ajax.loading']}" 
+                        emptyMessage="#{ msgsGametime['manageGrupoGame.text.noEntities']}">
+
+                        <p:column headerText="#{msgsGametime['manageGroupGame.table.name']}">
+                            <h:outputText value="#{entity.name}" />
+                        </p:column>
+                        
+                        <p:column headerText="#{msgsGametime['manageGroupGame.table.game']}">
+                            <h:outputText value="#{entity.game.name}" />
+                        </p:column>
+                        
+                        <p:column headerText="#{msgsGametime['manageGroupGame.table.admin']}">
+                            <h:outputText value="#{entity.adminUser.name}" />
+                        </p:column>
+
+                        <p:ajax event="rowSelect" update=":buttonsForm" />
+                    </p:dataTable>
+                 </h:panelGroup>
+             </h:form>
+                 
+                 
+             <!--  FORMULARIO DOS BOTOES  -->
+             <h:form id="buttonsForm">
+                <div class="crudButtons">
+                    <p:commandButton action="#{manageGroupGameController.create}" value="#{msgsGametime['crud.button.create']}" icon="buttonNew" update=":globalMessages"/>
+                    <p:commandButton action="#{manageGroupGameController.trash}" value="#{msgsGametime['crud.button.delete']}" icon="buttonTrash" disabled="#{manageGroupGameController.selectedEntity.adminUser != sessionController.authenticatedUser}" process="@this" update=":trashForm :globalMessages" />
+                    
+                    <p:commandButton action="#{manageGroupGameController.addUser}" value="#{msgsGametime['manageGroupGame.button.addUser']}"  disabled="#{manageGroupGameController.selectedEntity.adminUser != sessionController.authenticatedUser}" process="@this" update=":globalMessages" />
+                    <p:commandButton action="#{manageGameAccountController.list}" value="#{msgsGametime['manageGroupGame.button.addConta']}"  disabled="#{(manageGroupGameController.selectedEntity.adminUser != sessionController.authenticatedUser) or manageGroupGameController.selectedEntity == null }" process="@this"/>
+                	<p:commandButton action="#{manageGameAccountController.jogar}" value="#{msgsGametime['manageGroupGame.button.play']}"  disabled="#{(manageGroupGameController.selectedEntity == null)}" process="@this" update=":globalMessages" />
+                    
+                </div>
+            </h:form>
+            
+            
+            
+            <!-- FORMULARIO QUE MOSTRAM OS GRUPOS A SEREM EXCLUIDOS   -->
+            <h:form id="trashForm">
+                <p:panel id="trashPanel" styleClass="trashPanel" header="#{msgsGametime['crud.text.trashHeader']}" toggleable="true" rendered="#{not empty manageGroupGameController.trashCan}">
+                    <p:dataList value="#{manageGroupGameController.trashCan}" var="entity" type="unordered">
+                        #{entity.name}
+                    </p:dataList>
+                    <div class="nemoUtilsFormInternalButton">
+                        <p:commandButton action="#{manageGroupGameController.cancelDeletion}" value="#{msgsGametime['crud.button.cancelDeletion']}" icon="buttonCancel" update=":trashForm :buttonsForm :listingForm" />
+                        <p:commandButton action="#{manageGroupGameController.delete}" value="#{msgsGametime['crud.button.confirmDeletion']}" icon="buttonOk" />
+                       </div>
+                </p:panel>
+            </h:form>
+                   
+		</div>
+    </ui:define>
+</ui:composition>
